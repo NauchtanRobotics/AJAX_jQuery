@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<!-- saved from url=(0053)https://nauchtan.com/erp/assemblyproceduredisplay.php -->
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">      
+        <meta name="viewport" content="width=device-width, initial-scale=1">   
+        <title>Nauchtan FAMS </title>   
+        <link rel='stylesheet' href='https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css'>
+        <link href='style.css' type='text/css' rel='stylesheet' />  
+        <style>      
+           body .modal-dialog {
+              width: 80%; /* desired relative width */
+              /*left: 45%; /* (100%-width)/2 */
+              /* place center */
+              margin-left:auto;
+              margin-right:auto; 
+            }
+        
+        </style>
+
+<script type = "text/javascript" 
+         src = "https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+<script language="javascript">
+ var eventSchedule;  // 
+ var stopwatchCount = 0.0; // add to this the value of accumulated_min from the db.
+ var serial = 59;
+ var step = 270;
+ var prod = 27;
+ 
+ function secondsTimeSpanToHMS(s) {
+    var h = Math.floor(s/3600); //Get whole hours
+    s -= h*3600;
+    var m = Math.floor(s/60); //Get remaining minutes
+    s -= m*60;
+    s = Math.round(s);
+    return h+":"+(m < 10 ? '0'+m : m)+":"+(s < 10 ? '0'+s : s); //zero padding on minutes and seconds
+}
+
+$(document).ready(function() {
+
+
+    if ($("#status").length) { //recording_bar didn't work if ( $( "#myDiv" ).length ) 
+         
+         $("#duration").html("0");
+         $("#goal").html( secondsTimeSpanToHMS($("#goal").html()*60));
+         serial = $('#serial').val();//document.getElementById('age').value;
+         step   = $('#step').val();//document.getElementById('age').value;
+         prod   = $('#prod').val();// document.getElementById('age').value;
+   // alert("Values are: "+serial+" "+step + " " + prod);
+
+        $.post("assembly_restart.php",
+        {
+            serial: serial,
+            step: step
+        },
+        function(data, status){
+            //alert("Data: " + data + "\nStatus: " + status);
+            if (status === "success"){
+                eventSchedule = setInterval(myTimer, 1000);
+                $("#status").html("Recording Duration");
+                //alert(data);
+                stopwatchCount = parseFloat(data); // already converted to seconds 
+            }
+            else{
+                //stopwatchCount = "fail";
+                eventSchedule = setInterval(myTimer, 1000);
+                $("#status").html("Recording Duration");
+                //alert(data);
+                stopwatchCount = 0.0; // already converted to seconds 
+            }
+        });
+    }else{
+        clearInterval(eventSchedule);
+    }
+   /* $("#recording_bar > img").mouseenter(function () {
+            $( this ).fadeOut( 100 );
+            $( this ).fadeIn( 500 );  }
+        );*/
+    
+    $("#recording_bar > img").mouseenter(function () {
+            $( this ).fadeTo( "medium", 0.7 );  }
+        ).mouseleave(function() {  $( this ).css( "opacity", 1 ) } );
+            
+   $("#recording_bar > img").click(function () {
+            $( this ).fadeTo( 200, 0.2, function() {
+      $( this ).css( "opacity", 1 ) } );  });
+            
+   $("#pause").click(function(){
+       $( this ).fadeTo( "medium", 0.7 );
+        var serial = $('#serial').val();//document.getElementById('age').value;
+        var step   = $('#step').val();//document.getElementById('age').value;
+        var prod   = $('#prod').val();// document.getElementById('age').value;
+   // alert("Values are: "+serial+" "+step + " " + prod);
+        
+        $("#pause").attr('src',"pause_red_28x28.jpg");
+        $("#restart").attr('src',"record_grey_28x28.jpg");
+        
+        $.post("assembly_pause.php",
+        {
+            serial: serial,
+            step: step
+        },
+        function(data, status){
+            alert("Data: " + data + "\nStatus: " + status);
+            if (status === "success") {
+                clearInterval(eventSchedule);
+                $("#status").html("Recording Paused");
+            }
+        });
+    });
+    
+    $("#restart").click(function(){
+        serial = $('#serial').val();//document.getElementById('age').value;
+        step   = $('#step').val();//document.getElementById('age').value;
+        prod   = $('#prod').val();// document.getElementById('age').value;
+        // alert("Values are: "+serial+" "+step + " " + prod);
+        $("#restart").attr('src',"record_red_28x28.jpg");
+        $("#pause").attr('src',"pause_grey_28x28.jpg");
+        $.post("assembly_restart.php",
+        {
+            serial: serial,
+            step: step
+        },
+        function(data, status){
+            //alert("Data: " + data + "\nStatus: " + status);
+            if (status === "success"){
+                eventSchedule = setInterval(myTimer, 1000);
+                $("#status").html("Recording Duration");
+                //alert(data);
+                stopwatchCount = parseFloat(data); // already converted to seconds 
+            }
+            else{
+                //stopwatchCount = "fail";
+                eventSchedule = setInterval(myTimer, 1000);
+                $("#status").html("Recording Duration");
+                //alert(data);
+                stopwatchCount = 0.0; // already converted to seconds 
+            }
+                
+        });
+    });
+    
+    //$("#restart").trigger('click');
+    
+	
+});
+
+</script>
+<body>
+    
+<div class="container-fluid">
+    
+    <div class="trademark">
+        <h1>Nauchtan Cloud Software<small>™</small></h1>
+        <h4 style="font-family:Arial Narrow; color: #477201;">Fabrication and Assembly Management System (FAMS)</h4>
+    </div>
+       
+ 
+    <div class="trademark">
+        <table>
+            <tbody><tr><td colspan="3" style="width: 650px; text-align: right;">Welcome David, Nauchtan</td></tr>            <tr>
+                <td style="max-width: 80%; text-align: left;"><h4>Assembly Procedure</h4></td>
+                <td style="width: 75px;"><h5><a style="border-radius: 10px; color: white; padding-left: 10px; padding-right: 10px; background-color: #477201;" href="https://nauchtan.com/erp/flowchart.php">Home</a></h5></td>           
+                <td style="width: 75px;"><a style="border-radius: 10px; color: white; padding-left: 10px; padding-right: 10px; background-color: #477201;" href="https://nauchtan.com/erp/logout.php?logout">Logout</a></td>           
+            </tr>
+        </tbody></table>       
+    </div>
+      
+    <div class="todo">
+    
+    
+
+<p>Build of product number 27, Serial# 00059.<br>Step number: <strong>270</strong></p><br>
+<form id="form2" action="https://nauchtan.com/erp/assemblyproceduredisplay.php" method="post">
+    <input type="hidden" id="prod" name="prod" value="27">
+    <input type="hidden" id="serial" name="serial" value="59">
+    <input type="hidden" id="step" name="step" value="270">
+    <table border="1">
+            <tr>
+                <th width="100px" align="left">Description </th>
+                <th width="65px">Distinction</th>
+                <th width="100px">Critical Issues</th>
+                <th width="65px">Tool</th>
+                <th width="55px">Duration</th>
+            </tr> 
+            <tr>
+                <td style="text-align: left; padding: 10px 10px 10px 10px;">Connect part to assembly using 1 bolt</td>
+                <td style="text-align: left; padding: 10px 10px 10px 10px;">Left Side</td>
+                <td style="text-align: left; padding: 10px 10px 10px 10px;">For simplicity, this file stripped of PHP. Time recording will not work without DB connection.</td>
+                <td style="text-align: left; padding: 10px 10px 10px 10px;"></td>
+                <td style="text-align: center;">
+                    <div id="duration">0:01:01</div>of<br>
+                    <div id="goal">0:02:00</div>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="5" style="align:left;">
+                    <div id="status" style="align:top; padding-left:5px; padding-right:1px; padding-top:10px; width:100px; max-width:100px; display:inline-block;">
+                        Recording Duration
+                    </div>
+                    <div id="recording_bar">
+                        <img id="restart" src="record_red_28x28.jpg" alt="recording time taken" style="vertical-align: top; padding-top: 6px; padding-left:8px; padding-right:8px;" border="0">
+                        <img id="pause" alt="pause the clock" src="pause_grey_28x28.jpg" style="vertical-align: top; padding-top: 6px; padding-left:8px; padding-right:8px;" border="0">
+                        <img id="next" onclick="onControlButton(this);" src="green_tick_28x28.png" style="vertical-align: top; padding-top: 6px; padding-right: 40px;" border="0">
+                        <img id="finish" onclick="onControlButton(this);" src="black_tick_28x28.jpg" style="vertical-align: top; padding-top: 6px; padding-right: 40px;" border="0">
+                        <img id="cancel" style="vertical-align: top; padding-top: 6px; padding-left: 40px;" onclick="onControlButton(this);" src="cancel_28x28.jpg" border="0">
+                    </div>
+                    <br>
+                    <a target="_blank" href="https://nauchtan.com/erp/addpart.php?partnum=11">Part# 11 (info)</a> 
+                    <a target="_blank" href="https://nauchtan.com/erp/inventory.php?partnum=11">(stock)</a>
+                    <br>                    
+                    <img style="max-width:100%;height:auto;" src="./assembly_time_recording_files/img1.jpg">
+                </td>
+            </tr>
+    </table>
+</form>
+                    
+</div>
+
+
+<script>
+function myTimer() {
+    stopwatchCount += 1.0; // new Date();
+    $("#duration").first().html(""+secondsTimeSpanToHMS(stopwatchCount) ); // secondsTimeSpanToHMS(125);
+}
+
+function onControlButton(e) {  
+    
+    var str = e.getAttribute('id');
+    switch (str ) {
+       case 'restart':
+           //alert("Restart");
+           // then change to red record button and grey pause 
+           //document.getElementById("restart_input").click(); // post restart_input
+           break;
+       case 'pause':
+           //alert("Pause");
+            // then change to grey record button and  red pause 
+           //document.getElementById("pause_input").click(); // post pause_input
+           break;
+       case 'finish':
+           //alert("Are you sure?");
+           document.getElementById("finish_input").click(); //post finish_input
+           break;
+       case 'next':
+           document.getElementById("next_input").click(); //post finish_input
+           break;
+       case 'cancel':
+           var fred = confirm("Are you sure that you want to not start this step (for the moment)?");
+           if (fred) 
+               document.getElementById("cancel_input").click();// post cancel_input
+           break;
+    }    
+    
+}
+
+</script>
+
+</div>
+</body>
+</html>
